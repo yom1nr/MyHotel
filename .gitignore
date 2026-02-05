@@ -6,9 +6,6 @@
 **/dist-ssr/
 **/build/
 
-# Raw screenshots (source). Use docs/screenshots for README.
-screenshots/
-
 # Env files
 **/.env
 **/.env.*
