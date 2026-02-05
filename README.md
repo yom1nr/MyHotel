@@ -98,11 +98,9 @@ npm run dev
 
 Client จะรันที่ `http://localhost:5173`
 
-## Screenshots
+## Screenshots (Preview)
 
 โครงการระบบบริหารจัดการโรงแรม (Hotel Management System)
-
-## Screenshots (Preview)
 
 ### Admin Dashboard
 
