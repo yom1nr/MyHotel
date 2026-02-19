@@ -5,7 +5,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   Bar,
   BarChart,
@@ -20,12 +20,14 @@ import {
 } from 'recharts'
 
 import StatCard from '../components/StatCard'
+import PageHeader from '../components/ui/PageHeader'
+import Badge from '../components/ui/Badge'
+import Card from '../components/ui/Card'
+import Button from '../components/ui/Button'
+import Skeleton from '../components/ui/Skeleton'
 import { fetchDashboardStats } from '../services/dashboardService'
-import { clearToken } from '../services/authService'
 import type { DashboardStats, RecentBooking } from '../types/dashboard'
 import { formatCurrencyTHB, formatDateShort, formatNumberTH } from '../utils/format'
-
-import styles from './Dashboard.module.css'
 
 function formatMonthLabel(value: string) {
   const d = new Date(value)
@@ -36,50 +38,24 @@ function formatMonthLabel(value: string) {
 
 function badgeForStatus(status: string) {
   const s = status.toLowerCase()
-
-  if (s === 'confirmed' || s === 'checked_in' || s === 'paid') {
-    return {
-      label: 'ยืนยันแล้ว',
-      badge: 'bg-orange-50 text-orange-700 ring-orange-200',
-    }
-  }
-
-  if (s === 'pending') {
-    return {
-      label: 'รอดำเนินการ',
-      badge: 'bg-amber-50 text-amber-700 ring-amber-200',
-    }
-  }
-
-  if (s === 'cancelled') {
-    return {
-      label: 'ยกเลิก',
-      badge: 'bg-rose-50 text-rose-700 ring-rose-200',
-    }
-  }
-
-  if (s === 'checked_out') {
-    return {
-      label: 'เช็คเอาท์แล้ว',
-      badge: 'bg-slate-50 text-slate-700 ring-slate-200',
-    }
-  }
-
-  return {
-    label: status,
-    badge: 'bg-slate-50 text-slate-700 ring-slate-200',
-  }
+  if (s === 'confirmed' || s === 'checked_in' || s === 'paid')
+    return { label: 'ยืนยันแล้ว', variant: 'emerald' as const }
+  if (s === 'pending')
+    return { label: 'รอดำเนินการ', variant: 'amber' as const }
+  if (s === 'cancelled')
+    return { label: 'ยกเลิก', variant: 'rose' as const }
+  if (s === 'checked_out')
+    return { label: 'เช็คเอาท์แล้ว', variant: 'slate' as const }
+  return { label: status, variant: 'slate' as const }
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [stats, setStats] = useState<DashboardStats | null>(null)
 
   useEffect(() => {
     let cancelled = false
-
     async function load() {
       try {
         setLoading(true)
@@ -96,11 +72,8 @@ export default function Dashboard() {
         if (!cancelled) setLoading(false)
       }
     }
-
     load()
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [])
 
   const totalRooms = stats?.totalRooms ?? 0
@@ -109,250 +82,218 @@ export default function Dashboard() {
   const totalRevenue = stats?.totalRevenue ?? 0
   const recentBookings: RecentBooking[] = stats?.recentBookings ?? []
   const totalBookings = stats?.totalBookings ?? 0
-  const netProfit = stats?.netProfit ?? 0
   const revenueByMonth = useMemo(
     () => (stats?.revenueByMonth ?? []).map((p) => ({ month: formatMonthLabel(p.month), revenue: p.revenue })),
     [stats?.revenueByMonth]
   )
 
   const kpiCards = useMemo(
-    () =>
-      [
-        {
-          label: 'ห้องว่าง',
-          value: availableRooms,
-          sub: `จากทั้งหมด ${totalRooms}`,
-          accent: 'bg-orange-500',
-          icon: BedDouble,
-        },
-        {
-          label: 'ห้องเข้าพัก',
-          value: occupiedRooms,
-          sub: `จากทั้งหมด ${totalRooms}`,
-          accent: 'bg-blue-600',
-          icon: Users,
-        },
-        {
-          label: 'รายได้รวม',
-          value: formatNumberTH(totalRevenue),
-          sub: 'บาท',
-          accent: 'bg-amber-500',
-          icon: CreditCard,
-        },
-        {
-          label: 'การจองทั้งหมด',
-          value: totalBookings,
-          sub: 'รายการทั้งหมด',
-          accent: 'bg-violet-600',
-          icon: ClipboardList,
-        },
-      ] as const,
-    [availableRooms, netProfit, occupiedRooms, totalBookings, totalRevenue, totalRooms]
+    () => [
+      {
+        label: 'ห้องว่าง',
+        value: availableRooms,
+        sub: `จากทั้งหมด ${totalRooms}`,
+        icon: BedDouble,
+        gradient: 'from-emerald-500 to-teal-500',
+        progress: totalRooms ? (availableRooms / totalRooms) * 100 : 0,
+      },
+      {
+        label: 'ห้องเข้าพัก',
+        value: occupiedRooms,
+        sub: `จากทั้งหมด ${totalRooms}`,
+        icon: Users,
+        gradient: 'from-blue-500 to-indigo-500',
+        progress: totalRooms ? (occupiedRooms / totalRooms) * 100 : 0,
+      },
+      {
+        label: 'รายได้รวม',
+        value: formatNumberTH(totalRevenue),
+        sub: 'บาท',
+        icon: CreditCard,
+        gradient: 'from-amber-500 to-orange-500',
+        progress: 75,
+      },
+      {
+        label: 'การจองทั้งหมด',
+        value: totalBookings,
+        sub: 'รายการ',
+        icon: ClipboardList,
+        gradient: 'from-indigo-500 to-purple-500',
+        progress: 30,
+      },
+    ] as const,
+    [availableRooms, occupiedRooms, totalBookings, totalRevenue, totalRooms]
   )
 
   const roomStatus = useMemo(
-    () =>
-      [
-        { name: 'ว่าง', value: availableRooms, color: '#10b981' },
-        { name: 'เข้าพัก', value: occupiedRooms, color: '#3b82f6' },
-      ].filter((x) => x.value > 0),
+    () => [
+      { name: 'ว่าง', value: availableRooms, color: '#34d399' },
+      { name: 'เข้าพัก', value: occupiedRooms, color: '#6366f1' },
+    ].filter((x) => x.value > 0),
     [availableRooms, occupiedRooms]
   )
 
-  return (
-    <div>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <div>
-            <div className={styles.headerTitle}>Dashboard</div>
-            <div className={styles.headerSubtitle}>ภาพรวมระบบของห้องพัก</div>
-          </div>
-
-          <div className={styles.headerRight}>
-            <div className={styles.statusPill}>
-              <span className={styles.onlineDot} />
-              <span>ออนไลน์</span>
-            </div>
-            <button className={styles.primaryBtn}>+ เพิ่มรายการ</button>
-            <button
-              className={styles.secondaryBtn}
-              onClick={() => {
-                clearToken()
-                navigate('/login', { replace: true })
-              }}
-            >
-              ออกจากระบบ
-            </button>
-          </div>
+  if (loading) {
+    return (
+      <div>
+        <PageHeader title="Dashboard" subtitle="ภาพรวมระบบของห้องพัก" />
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="space-y-3">
+              <Skeleton height="h-3" width="w-20" />
+              <Skeleton height="h-7" width="w-32" />
+              <Skeleton height="h-1.5" />
+            </Card>
+          ))}
         </div>
-      </header>
-
-      <div className={styles.container}>
-        {loading ? (
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-            Loading...
-          </div>
-        ) : error ? (
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-rose-200">
-            <div className="text-sm font-semibold text-rose-700">โหลดข้อมูลไม่สำเร็จ</div>
-            <div className="mt-1 text-xs text-slate-600">{error}</div>
-          </div>
-        ) : null}
-
-        <section className={styles.kpiGrid}>
-          {kpiCards.map((card) => {
-            return (
-              <StatCard
-                key={card.label}
-                label={card.label}
-                value={card.value}
-                sub={card.sub}
-                icon={card.icon}
-                accentClassName={card.accent}
-                progressPercent={
-                  card.label === 'ห้องว่าง'
-                    ? totalRooms
-                      ? (availableRooms / totalRooms) * 100
-                      : 0
-                    : card.label === 'ห้องเข้าพัก'
-                      ? totalRooms
-                        ? (occupiedRooms / totalRooms) * 100
-                        : 0
-                      : card.label === 'รายได้รวม'
-                        ? 75
-                        : 30
-                }
-              />
-            )
-          })}
-        </section>
-
-        <section className={styles.sectionGrid}>
-          <div className={styles.card + ' ' + styles.sectionSpan2}>
-            <div className={styles.sectionHeader}>
-              <div>
-                <div className={styles.sectionTitle}>รายได้รายเดือน</div>
-                <div className={styles.sectionSubtitle}>ภาพรวมรายได้ 6 เดือนล่าสุด</div>
-              </div>
-              <div className={styles.chip}>6 เดือน</div>
-            </div>
-
-            <div className={styles.chartWrap}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={revenueByMonth} margin={{ left: 4, right: 10 }}>
-                  <XAxis dataKey="month" tickLine={false} axisLine={false} />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(v) => `${v / 1000}k`}
-                  />
-                  <Tooltip
-                    cursor={{ fill: 'rgba(15, 23, 42, 0.04)' }}
-                    formatter={(value) => [formatCurrencyTHB(Number(value)), 'รายได้']}
-                    labelFormatter={(label) => `เดือน ${label}`}
-                  />
-                  <Bar dataKey="revenue" radius={[10, 10, 0, 0]} fill="#f97316" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className={styles.card}>
-            <div>
-              <div className={styles.sectionTitle}>สถานะห้องพัก</div>
-              <div className={styles.sectionSubtitle}>สัดส่วนห้องตามสถานะ</div>
-            </div>
-
-            <div className={styles.chartWrap}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={roomStatus}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={62}
-                    outerRadius={90}
-                    paddingAngle={2}
-                    stroke="transparent"
-                  >
-                    {roomStatus.map((s) => (
-                      <Cell key={s.name} fill={s.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => [`${v} ห้อง`, 'จำนวน']} />
-                  <Legend
-                    verticalAlign="bottom"
-                    iconType="circle"
-                    formatter={(value) => (
-                      <span className="text-xs text-slate-600">{value}</span>
-                    )}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className={styles.donutFooter}>
-              <div className={styles.donutFooterLabel} style={{ marginBottom: '1.25rem' }}>
-                รวมทั้งหมด
-              </div>
-              <div className={styles.donutFooterValue}>{totalRooms}ห้อง</div>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.tableSection}>
-          <div className={styles.tableHeader}>
-            <div>
-              <div className={styles.sectionTitle}>การจองล่าสุด</div>
-              <div className={styles.sectionSubtitle}>รายการล่าสุดในระบบ</div>
-            </div>
-            <Link to="/bookings" className={styles.secondaryBtn}>
-              ดูทั้งหมด
-            </Link>
-          </div>
-
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr className={styles.theadRow}>
-                  <th className={styles.th}>รหัส</th>
-                  <th className={styles.th}>ผู้เข้าพัก</th>
-                  <th className={styles.th}>ห้อง</th>
-                  <th className={styles.th}>วันที่</th>
-                  <th className={styles.th}>ราคา</th>
-                  <th className={styles.th}>สถานะ</th>
-                </tr>
-              </thead>
-              <tbody className={styles.tbody}>
-                {recentBookings.map((b) => {
-                  const badge = badgeForStatus(b.status)
-                  return (
-                    <tr key={b.booking_code} className={styles.tr}>
-                      <td className={styles.tdStrong}>{b.booking_code}</td>
-                      <td className={styles.td}>{b.guest_full_name}</td>
-                      <td className={styles.td}>{b.room_number}</td>
-                      <td className={styles.td}>{formatDateShort(b.check_in_date)}</td>
-                      <td className={styles.td}>
-                        {formatCurrencyTHB(Number(b.total_amount || 0))}
-                      </td>
-                      <td className={styles.td}>
-                        <span
-                          className={
-                            'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ring-1 ' +
-                            badge.badge
-                          }
-                        >
-                          {badge.label}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
       </div>
+    )
+  }
+
+  return (
+    <div className="animate-fade-in">
+      <PageHeader title="Dashboard" subtitle="ภาพรวมระบบของห้องพัก" />
+
+      {error ? (
+        <Card className="mt-6 border-rose-500/20">
+          <div className="text-sm font-semibold text-rose-400">โหลดข้อมูลไม่สำเร็จ</div>
+          <div className="mt-1 text-xs text-slate-400">{error}</div>
+        </Card>
+      ) : null}
+
+      <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {kpiCards.map((card) => (
+          <StatCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            sub={card.sub}
+            icon={card.icon}
+            accentClassName=""
+            gradient={card.gradient}
+            progressPercent={card.progress}
+          />
+        ))}
+      </section>
+
+      <section className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <Card className="xl:col-span-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm font-semibold text-white">รายได้รายเดือน</div>
+              <div className="text-xs text-slate-500">ภาพรวมรายได้ 6 เดือนล่าสุด</div>
+            </div>
+            <Badge variant="indigo">6 เดือน</Badge>
+          </div>
+
+          <div className="mt-4 h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={revenueByMonth} margin={{ left: 4, right: 10 }}>
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `${v / 1000}k`} />
+                <Tooltip
+                  cursor={{ fill: 'rgba(99, 102, 241, 0.06)' }}
+                  contentStyle={{ background: '#141c32', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '12px', color: '#e2e8f0' }}
+                  formatter={(value) => [formatCurrencyTHB(Number(value)), 'รายได้']}
+                  labelFormatter={(label) => `เดือน ${label}`}
+                />
+                <Bar dataKey="revenue" radius={[8, 8, 0, 0]} fill="url(#barGradient)" />
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" />
+                    <stop offset="100%" stopColor="#22d3ee" />
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        <Card>
+          <div>
+            <div className="text-sm font-semibold text-white">สถานะห้องพัก</div>
+            <div className="text-xs text-slate-500">สัดส่วนห้องตามสถานะ</div>
+          </div>
+
+          <div className="mt-4 h-60">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={roomStatus}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={60}
+                  outerRadius={85}
+                  paddingAngle={3}
+                  stroke="transparent"
+                >
+                  {roomStatus.map((s) => (
+                    <Cell key={s.name} fill={s.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ background: '#141c32', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', fontSize: '12px', color: '#e2e8f0' }}
+                  formatter={(v) => [`${v} ห้อง`, 'จำนวน']}
+                />
+                <Legend
+                  verticalAlign="bottom"
+                  iconType="circle"
+                  formatter={(value) => <span className="text-xs text-slate-400">{value}</span>}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="text-center">
+            <div className="text-xs text-slate-500">รวมทั้งหมด</div>
+            <div className="mt-1 text-xl font-bold text-white">{totalRooms} ห้อง</div>
+          </div>
+        </Card>
+      </section>
+
+      <Card className="mt-6">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-white">การจองล่าสุด</div>
+            <div className="text-xs text-slate-500">รายการล่าสุดในระบบ</div>
+          </div>
+          <Link to="/bookings">
+            <Button variant="secondary" size="sm">ดูทั้งหมด</Button>
+          </Link>
+        </div>
+
+        <div className="mt-4 overflow-x-auto">
+          <table className="min-w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-white/[0.06] text-xs text-slate-500">
+                <th className="whitespace-nowrap py-3 pr-6 font-medium">รหัส</th>
+                <th className="whitespace-nowrap py-3 pr-6 font-medium">ผู้เข้าพัก</th>
+                <th className="whitespace-nowrap py-3 pr-6 font-medium">ห้อง</th>
+                <th className="whitespace-nowrap py-3 pr-6 font-medium">วันที่</th>
+                <th className="whitespace-nowrap py-3 pr-6 font-medium">ราคา</th>
+                <th className="whitespace-nowrap py-3 pr-6 font-medium">สถานะ</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.04]">
+              {recentBookings.map((b) => {
+                const badge = badgeForStatus(b.status)
+                return (
+                  <tr key={b.booking_code} className="text-slate-300 transition hover:bg-white/[0.02]">
+                    <td className="whitespace-nowrap py-3 pr-6 font-semibold text-white">{b.booking_code}</td>
+                    <td className="whitespace-nowrap py-3 pr-6">{b.guest_full_name}</td>
+                    <td className="whitespace-nowrap py-3 pr-6">{b.room_number}</td>
+                    <td className="whitespace-nowrap py-3 pr-6">{formatDateShort(b.check_in_date)}</td>
+                    <td className="whitespace-nowrap py-3 pr-6">{formatCurrencyTHB(Number(b.total_amount || 0))}</td>
+                    <td className="whitespace-nowrap py-3 pr-6">
+                      <Badge variant={badge.variant}>{badge.label}</Badge>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   )
 }

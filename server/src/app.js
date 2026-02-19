@@ -1,5 +1,12 @@
 const express = require('express')
 const cors = require('cors')
+const helmet = require('helmet')
+const compression = require('compression')
+
+const requestId = require('./middleware/requestId')
+const errorHandler = require('./middleware/errorHandler')
+const { generalLimiter, authLimiter } = require('./middleware/rateLimiter')
+const logger = require('./config/logger')
 
 const indexRoutes = require('./routes')
 const authRoutes = require('./routes/authRoutes')
@@ -15,10 +22,26 @@ const attendanceRoutes = require('./routes/attendanceRoutes')
 
 const app = express()
 
-app.use(cors())
-app.use(express.json())
+const isProd = process.env.NODE_ENV === 'production'
 
-app.use('/api/auth', authRoutes)
+if (isProd) app.set('trust proxy', 1)
+
+app.use(helmet({ contentSecurityPolicy: false }))
+app.use(compression())
+app.use(cors({
+  origin: process.env.CLIENT_URL || '*',
+  credentials: true,
+}))
+app.use(express.json({ limit: '1mb' }))
+app.use(requestId)
+app.use(generalLimiter)
+
+app.use((req, _res, next) => {
+  logger.info(`${req.method} ${req.originalUrl}`, { requestId: req.requestId })
+  next()
+})
+
+app.use('/api/auth', authLimiter, authRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/rooms', roomRoutes)
 app.use('/api/bookings', bookingRoutes)
@@ -31,7 +54,17 @@ app.use('/api/attendance', attendanceRoutes)
 app.use('/api', indexRoutes)
 
 app.get('/health', (_req, res) => {
-  res.json({ ok: true })
+  res.json({
+    success: true,
+    data: {
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    },
+  })
 })
+
+app.use(errorHandler)
 
 module.exports = app

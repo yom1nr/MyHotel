@@ -1,15 +1,10 @@
-const { getDashboardData } = require('../services/dashboardService')
+const asyncHandler = require('../utils/asyncHandler')
+const { success } = require('../utils/apiResponse')
+const dashboardService = require('../services/dashboardService')
 
-async function getDashboard(req, res) {
-  try {
-    const data = await getDashboardData()
-    res.json({ success: true, data })
-  } catch (_error) {
-    res.status(500).json({
-      success: false,
-      message: 'Failed to load dashboard data',
-    })
-  }
-}
+const getDashboard = asyncHandler(async (_req, res) => {
+  const data = await dashboardService.getDashboardData()
+  return success(res, data)
+})
 
 module.exports = { getDashboard }

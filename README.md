@@ -1,181 +1,177 @@
-# 🏨 Hotel Management System
+# 🏨 MyHotel — Enterprise Hotel Management System
 
-> ระบบบริหารจัดการโรงแรมแบบครบวงจร พัฒนาด้วย **React + Node.js + MySQL**
-> รองรับการจองแบบ Guest (ไม่ต้องสมัครสมาชิก) และมีระบบสิทธิ์การเข้าถึงตามตำแหน่งงาน (RBAC)
+> **Full-stack hotel management platform** built with **React 19 · Express 5 · MySQL 8** featuring dark-glass enterprise UI, layered backend architecture, Zod validation, JWT RBAC, and Docker-ready deployment.
 
----
-
-## 📑 สารบัญ
-
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [สถาปัตยกรรมระบบ](#-สถาปัตยกรรมระบบ-architecture)
-- [โครงสร้างโปรเจกต์](#-โครงสร้างโปรเจกต์)
-- [Database Schema](#-database-schema)
-- [API Endpoints](#-api-endpoints)
-- [Role-Based Access Control](#-role-based-access-control-rbac)
-- [การติดตั้งและรันโปรเจกต์](#-การติดตั้งและรันโปรเจกต์)
-- [Screenshots](#-screenshots)
-- [หมายเหตุ](#-หมายเหตุ)
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white" />
+  <img src="https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/TailwindCSS-3-06B6D4?logo=tailwindcss&logoColor=white" />
+  <img src="https://img.shields.io/badge/Zod-Validation-3E67B1?logo=zod&logoColor=white" />
+</p>
 
 ---
 
-## ✨ Features
+## ⚡ Highlights
 
-### 🌐 Public (ลูกค้า / Guest)
-
-| ฟีเจอร์ | รายละเอียด |
-|---|---|
-| **Customer Home** | หน้าแรกสำหรับลูกค้า แสดงข้อมูลห้องพักและช่องทางเข้าสู่ระบบพนักงาน |
-| **Guest Booking** | จองห้องพักได้โดยไม่ต้องสมัครสมาชิก (2 ขั้นตอน: เลือกห้อง → กรอกข้อมูล) |
-| **Booking Status** | ตรวจสอบสถานะการจองด้วย Booking Code + เบอร์โทรศัพท์ |
-
-### 🔐 Admin / Staff (หลังเข้าสู่ระบบ)
-
-| ฟีเจอร์ | รายละเอียด |
-|---|---|
-| **Dashboard** | สรุปภาพรวมโรงแรม (จำนวนห้อง, การจอง, รายได้) พร้อมกราฟ |
-| **Room Management** | เพิ่ม / แก้ไข / ลบห้องพัก, จัดการประเภทห้อง (Standard, Deluxe, Suite) |
-| **Room Status** | แสดงสถานะห้องแบบ Read-only (Available, Occupied, Reserved, Maintenance) |
-| **Room Calendar** | ปฏิทินการจองแบบ Gantt-style เห็นภาพรวมการจองทั้งหมด |
-| **Booking Management** | จัดการการจอง + เปลี่ยนสถานะ (Pending → Confirmed → Check-in → Check-out) |
-| **Staff Management** | จัดการข้อมูลพนักงาน (เพิ่ม / แก้ไข / ลบ) — เฉพาะ Admin & Manager |
-| **Attendance** | บันทึกเวลาเข้า-ออกงานของพนักงาน พร้อม Clock Widget |
-| **Expenses** | บันทึกค่าใช้จ่ายของโรงแรม |
-| **Transactions** | จัดการธุรกรรมทั้งหมด (Payment, Refund, Expense) |
-| **Financial Report** | รายงานกำไร/ขาดทุน สรุปภาพรวมทางการเงิน |
+- **Enterprise Backend Architecture** — Service Layer → Controller → Route pattern with centralized error handling and standardized API responses
+- **Input Validation Pipeline** — Zod schemas on every mutating endpoint, parsed before reaching handlers
+- **JWT + RBAC** — 6-role access control (Admin, Manager, Receptionist, Housekeeper, Maintenance, Accountant) with route-level guards
+- **Dark Enterprise UI** — Glassmorphism design system with indigo/cyan accent gradients, micro-animations, and responsive layouts
+- **Production-Ready** — Rate limiting, Helmet security headers, CORS config, structured Winston logging, graceful shutdown, Docker Compose
+- **Guest Booking Flow** — Public booking without registration via booking code + phone verification
 
 ---
 
-## 🛠 Tech Stack
+## 🖥 Tech Stack
 
-### Frontend (`client/`)
+### Frontend
 
-| เทคโนโลยี | หน้าที่ |
-|---|---|
-| **React 19** | UI Library |
-| **TypeScript** | Type Safety |
-| **Vite 7** | Build Tool & Dev Server |
-| **TailwindCSS 3** | Utility-first CSS Framework |
-| **React Router 7** | Client-side Routing |
-| **Recharts** | กราฟ/แผนภูมิ สำหรับ Dashboard & Report |
-| **Lucide React** | ไอคอน |
+| Technology | Version | Purpose |
+|:-----------|:--------|:--------|
+| React | 19 | UI framework with hooks & functional components |
+| TypeScript | 5 | Static type safety across all components |
+| Vite | 7 | Sub-second HMR dev server & optimized builds |
+| TailwindCSS | 3 | Utility-first styling with custom design tokens |
+| React Router | 7 | Declarative client-side routing with guards |
+| Recharts | 2 | Composable chart library for dashboards |
+| Framer Motion | — | Smooth layout & page transition animations |
+| Lucide React | — | Consistent icon system |
 
-### Backend (`server/`)
+### Backend
 
-| เทคโนโลยี | หน้าที่ |
-|---|---|
-| **Node.js + Express 5** | REST API Server |
-| **MySQL (mysql2)** | ฐานข้อมูล |
-| **JWT (jsonwebtoken)** | Authentication & Authorization |
-| **bcrypt** | เข้ารหัสรหัสผ่าน |
-| **dotenv** | จัดการ Environment Variables |
-| **nodemon** | Auto-restart ระหว่าง Development |
+| Technology | Version | Purpose |
+|:-----------|:--------|:--------|
+| Node.js | 20+ | Runtime environment |
+| Express | 5 | HTTP framework with async middleware support |
+| MySQL 2 | 3 | Prepared-statement database driver |
+| Zod | 4 | Schema-first request validation |
+| JWT | 9 | Stateless authentication tokens |
+| bcrypt | 6 | Adaptive password hashing (cost=10) |
+| Winston | 3 | Structured JSON logging with request ID tracking |
+| Helmet | 8 | Security HTTP headers |
+| express-rate-limit | 7 | Brute-force & DDoS mitigation |
+
+### Infrastructure
+
+| Tool | Purpose |
+|:-----|:--------|
+| Docker + Compose | One-command deployment (MySQL + API + Nginx) |
+| Nginx | Reverse proxy + SPA routing in production |
+| dotenv | Environment-based configuration |
+| nodemon | Auto-restart during development |
 
 ---
 
-## 🏗 สถาปัตยกรรมระบบ (Architecture)
+## 🏗 Architecture
 
 ```
-┌─────────────────────┐         ┌─────────────────────┐         ┌──────────────┐
-│                     │  HTTP   │                     │  SQL    │              │
-│   React Frontend    │ ──────► │   Express Backend   │ ──────► │    MySQL     │
-│   (Vite + TS)       │  REST   │   (Node.js)         │         │   Database   │
-│   :5173             │  API    │   :3000              │         │              │
-└─────────────────────┘         └─────────────────────┘         └──────────────┘
-                                         │
-                                    JWT Auth +
-                                    RBAC Middleware
+                   ┌──────────────────────────────────────────────────────┐
+                   │                   CLIENT (React 19)                  │
+                   │  TailwindCSS · TypeScript · Recharts · Glassmorphism │
+                   └──────────────────────┬───────────────────────────────┘
+                                          │ REST API (JSON)
+                   ┌──────────────────────▼───────────────────────────────┐
+                   │                   SERVER (Express 5)                  │
+                   │                                                      │
+                   │  ┌─────────┐  ┌──────────┐  ┌──────────────────┐    │
+                   │  │ Helmet  │  │   CORS   │  │  Rate Limiter    │    │
+                   │  └────┬────┘  └────┬─────┘  └───────┬──────────┘    │
+                   │       └────────────┼────────────────┘               │
+                   │                    ▼                                 │
+                   │  ┌─────────────────────────────────┐                │
+                   │  │  Request ID · Winston Logger     │                │
+                   │  └────────────────┬────────────────┘                │
+                   │                   ▼                                  │
+                   │  ┌────────────────────────────────┐                 │
+                   │  │  Routes + Zod Validation        │                 │
+                   │  └────────────────┬───────────────┘                 │
+                   │                   ▼                                  │
+                   │  ┌────────────────────────────────┐                 │
+                   │  │  JWT Auth + RBAC Middleware      │                 │
+                   │  └────────────────┬───────────────┘                 │
+                   │                   ▼                                  │
+                   │  ┌────────────────────────────────┐                 │
+                   │  │  Controllers (thin handlers)    │                 │
+                   │  │  asyncHandler → apiResponse     │                 │
+                   │  └────────────────┬───────────────┘                 │
+                   │                   ▼                                  │
+                   │  ┌────────────────────────────────┐                 │
+                   │  │  Service Layer (business logic) │                 │
+                   │  │  AppError throws → errorHandler │                 │
+                   │  └────────────────┬───────────────┘                 │
+                   │                   │                                  │
+                   └───────────────────┼──────────────────────────────────┘
+                                       ▼
+                   ┌──────────────────────────────────────────────────────┐
+                   │              MySQL 8 (InnoDB + FK + Indexes)         │
+                   └──────────────────────────────────────────────────────┘
 ```
 
-- **Frontend** เรียก REST API ไปยัง Backend ผ่าน HTTP
-- **Backend** ใช้ JWT ในการ Authentication และ RBAC Middleware ควบคุมสิทธิ์
-- **Database** เก็บข้อมูลทั้งหมดใน MySQL (`hotel_management_system`)
+### Backend Patterns
+
+| Pattern | Implementation |
+|:--------|:---------------|
+| Service Layer | Business logic isolated in `services/` — DB access, transactions, validation |
+| Thin Controllers | ~10-30 lines each, only extract params and call services |
+| Centralized Error Handling | `AppError` hierarchy → `asyncHandler` → `errorHandler` middleware |
+| Standardized Responses | `apiResponse.success()` / `.created()` / `.paginated()` everywhere |
+| Request Validation | Zod schemas in `validators/`, enforced via `validate()` middleware |
+| Request Tracing | UUID `requestId` injected on every request, logged with Winston |
 
 ---
 
-## 📁 โครงสร้างโปรเจกต์
+## 📁 Project Structure
 
 ```
-testmyhotel/
-├── client/                          # 🖥 Frontend (React + Vite + TypeScript)
+myhotel/
+├── client/                          # Frontend (React 19 + TypeScript + Vite)
 │   ├── src/
-│   │   ├── components/              # Shared Components
-│   │   │   ├── AdminRoute.tsx       #   Route guard สำหรับ Admin/Manager
-│   │   │   ├── ClockWidget.tsx      #   นาฬิกาเข้า-ออกงาน
-│   │   │   ├── ProtectedRoute.tsx   #   Route guard สำหรับ Authenticated users
-│   │   │   ├── Sidebar.tsx          #   Sidebar เมนูสำหรับ Admin Panel
-│   │   │   └── StatCard.tsx         #   Card แสดงสถิติบน Dashboard
+│   │   ├── components/
+│   │   │   ├── ui/                  # Design system (Button, Card, Modal, Badge, etc.)
+│   │   │   ├── Sidebar.tsx          # Collapsible admin sidebar
+│   │   │   └── ClockWidget.tsx      # Staff attendance clock
 │   │   ├── layouts/
-│   │   │   └── AdminLayout.tsx      # Layout หลักของหน้า Admin (Sidebar + Content)
+│   │   │   └── AdminLayout.tsx      # Admin shell with sidebar + content area
 │   │   ├── pages/
-│   │   │   ├── client/              # หน้า Public สำหรับลูกค้า
-│   │   │   │   ├── BookingStatus.tsx
-│   │   │   │   ├── CustomerHome.tsx
-│   │   │   │   ├── CustomerLogin.tsx
-│   │   │   │   └── GuestBooking.tsx
-│   │   │   ├── Dashboard.tsx        # หน้า Dashboard
-│   │   │   ├── Booking.tsx          # จัดการการจอง
-│   │   │   ├── RoomManagement.tsx   # จัดการห้องพัก
-│   │   │   ├── RoomStatus.tsx       # สถานะห้อง (Read-only)
-│   │   │   ├── RoomCalendar.tsx     # ปฏิทินการจอง (Gantt)
-│   │   │   ├── Staff.tsx            # จัดการพนักงาน
-│   │   │   ├── Attendance.tsx       # เวลาเข้า-ออกงาน
-│   │   │   ├── Expenses.tsx         # ค่าใช้จ่าย
-│   │   │   ├── Transactions.tsx     # ธุรกรรม
-│   │   │   ├── FinancialReport.tsx  # รายงานการเงิน
-│   │   │   ├── Login.tsx            # หน้าเข้าสู่ระบบพนักงาน
-│   │   │   └── LandingPage.tsx      # หน้า Landing
-│   │   ├── services/                # API Service Layer (Axios/Fetch)
-│   │   │   ├── authService.ts
-│   │   │   ├── bookingService.ts
-│   │   │   ├── roomService.ts
-│   │   │   ├── staffService.ts
-│   │   │   ├── attendanceService.ts
-│   │   │   ├── transactionService.ts
-│   │   │   ├── dashboardService.ts
-│   │   │   └── reportService.ts
-│   │   ├── types/                   # TypeScript Type Definitions
-│   │   └── utils/                   # Utility Functions
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   └── tsconfig.json
+│   │   │   ├── client/              # Public pages (CustomerHome, GuestBooking, etc.)
+│   │   │   ├── Dashboard.tsx        # KPI cards + revenue chart
+│   │   │   ├── RoomManagement.tsx   # Room CRUD with modal forms
+│   │   │   ├── RoomCalendar.tsx     # Gantt-style booking calendar
+│   │   │   ├── Booking.tsx          # Booking management with status flow
+│   │   │   ├── Staff.tsx            # Staff management (admin only)
+│   │   │   ├── FinancialReport.tsx  # Revenue vs expense charts
+│   │   │   └── ...
+│   │   ├── services/                # API client layer (fetch wrappers)
+│   │   └── types/                   # Shared TypeScript interfaces
+│   ├── Dockerfile                   # Multi-stage build (Node → Nginx)
+│   └── nginx.conf                   # SPA routing + API proxy
 │
-├── server/                          # ⚙️ Backend (Node.js + Express)
-│   ├── database_schema.sql          # SQL Schema สำหรับสร้างฐานข้อมูล
+├── server/                          # Backend (Express 5 + MySQL)
 │   ├── src/
-│   │   ├── app.js                   # Express App Setup + Route Registration
-│   │   ├── server.js                # Server Entry Point
-│   │   ├── config/                  # Database Configuration
+│   │   ├── config/
+│   │   │   ├── db.js                # MySQL connection pool
+│   │   │   └── logger.js            # Winston structured logger
 │   │   ├── middleware/
-│   │   │   ├── authMiddleware.js    #   JWT Authentication
-│   │   │   └── adminOnlyMiddleware.js # Admin/Manager Access Guard
-│   │   ├── controllers/             # Business Logic
-│   │   │   ├── authController.js
-│   │   │   ├── bookingController.js
-│   │   │   ├── roomController.js
-│   │   │   ├── userController.js
-│   │   │   ├── transactionController.js
-│   │   │   ├── attendanceController.js
-│   │   │   └── dashboardController.js
-│   │   ├── routes/                  # API Route Definitions
-│   │   │   ├── authRoutes.js
-│   │   │   ├── bookingRoutes.js
-│   │   │   ├── roomRoutes.js
-│   │   │   ├── userRoutes.js
-│   │   │   ├── transactionRoutes.js
-│   │   │   ├── attendanceRoutes.js
-│   │   │   ├── dashboardRoutes.js
-│   │   │   ├── reportRoutes.js
-│   │   │   ├── publicBookingRoutes.js
-│   │   │   └── publicRoomRoutes.js
-│   │   └── services/                # Service Layer
-│   └── package.json
+│   │   │   ├── authMiddleware.js    # JWT verification
+│   │   │   ├── adminOnlyMiddleware.js
+│   │   │   ├── errorHandler.js      # Global error → JSON response
+│   │   │   ├── rateLimiter.js       # 100/min general, 10/min auth
+│   │   │   ├── requestId.js         # UUID per request
+│   │   │   └── validate.js          # Zod schema enforcement
+│   │   ├── validators/              # Zod schemas (auth, booking, room, etc.)
+│   │   ├── controllers/             # Thin async handlers
+│   │   ├── services/                # Business logic + DB queries
+│   │   ├── routes/                  # Express routers with validation
+│   │   └── utils/                   # AppError, asyncHandler, apiResponse, pagination
+│   ├── seed.js                      # Demo data seeder
+│   ├── database_schema.sql          # Full DDL with indexes + FK
+│   ├── Dockerfile                   # Node 20 Alpine production image
+│   └── .env.example                 # Environment variable template
 │
-├── docs/
-│   └── screenshots/                 # ภาพ Screenshots ของระบบ
-├── .gitignore
+├── docker-compose.yml               # MySQL + Server + Client (one command)
 └── README.md
 ```
 
@@ -183,280 +179,174 @@ testmyhotel/
 
 ## 🗄 Database Schema
 
-ฐานข้อมูล `hotel_management_system` ประกอบด้วย **5 ตาราง** หลัก:
+5 tables with foreign keys, composite indexes, and proper constraints:
 
 ```mermaid
 erDiagram
-    users ||--o{ bookings : "has"
-    users ||--o{ attendance : "records"
-    rooms ||--o{ bookings : "booked_as"
-    bookings ||--o{ transactions : "generates"
+    users ||--o{ bookings : creates
+    users ||--o{ attendance : records
+    rooms ||--o{ bookings : reserved_for
+    bookings ||--o{ transactions : generates
 
     users {
         BIGINT id PK
-        VARCHAR full_name
         VARCHAR email UK
         VARCHAR password_hash
-        ENUM role "admin | manager | receptionist | housekeeper | maintenance | accountant"
-        ENUM staff_position
-        VARCHAR phone
+        ENUM role "admin|manager|receptionist|housekeeper|maintenance|accountant"
         TINYINT is_active
     }
 
     rooms {
         BIGINT id PK
         VARCHAR room_number UK
-        ENUM room_type "standard | deluxe | suite"
-        INT floor
-        INT capacity_adults
-        INT capacity_children
+        ENUM room_type "standard|deluxe|suite"
         DECIMAL base_price
-        ENUM status "available | occupied | reserved | maintenance"
+        ENUM status "available|occupied|reserved|maintenance"
     }
 
     bookings {
         BIGINT id PK
         VARCHAR booking_code UK
-        BIGINT user_id FK
-        VARCHAR guest_full_name
-        VARCHAR guest_phone
         BIGINT room_id FK
         DATE check_in_date
         DATE check_out_date
-        INT nights
         DECIMAL total_amount
-        ENUM status "pending | confirmed | checked_in | checked_out | cancelled"
+        ENUM status "pending|confirmed|checked_in|checked_out|cancelled"
     }
 
     transactions {
         BIGINT id PK
         VARCHAR transaction_code UK
         BIGINT booking_id FK
-        ENUM type "payment | refund | expense"
-        ENUM method "cash | transfer | card | other"
+        ENUM type "payment|refund|expense"
         DECIMAL amount
-        ENUM status "pending | paid | cancelled"
     }
 
     attendance {
         BIGINT id PK
         BIGINT user_id FK
         DATE work_date
-        DATETIME clock_in_time
-        DATETIME clock_out_time
         DECIMAL hours_worked
-        ENUM status "on_time | late"
+        ENUM status "on_time|late"
     }
 ```
 
 ---
 
-## 🔌 API Endpoints
+## 🔌 API Reference
 
-### Public APIs (ไม่ต้อง Login)
+### Public (No Authentication)
 
-| Method | Endpoint | รายละเอียด |
-|---|---|---|
-| `GET` | `/api/public/rooms` | ดูห้องว่างทั้งหมด |
-| `POST` | `/api/public/bookings` | จองห้องแบบ Guest |
-| `GET` | `/api/public/bookings/status` | ตรวจสอบสถานะการจอง |
+| Method | Endpoint | Description |
+|:-------|:---------|:------------|
+| `GET` | `/health` | Health check + uptime + environment |
+| `GET` | `/api/public/rooms` | List available rooms |
+| `POST` | `/api/public/bookings` | Guest booking (no account needed) |
+| `GET` | `/api/bookings/status` | Lookup booking by code + phone |
 
-### Auth APIs
+### Authentication
 
-| Method | Endpoint | รายละเอียด |
-|---|---|---|
-| `POST` | `/api/auth/login` | เข้าสู่ระบบ (รับ JWT Token) |
+| Method | Endpoint | Validation | Description |
+|:-------|:---------|:-----------|:------------|
+| `POST` | `/api/auth/login` | `loginSchema` | Returns JWT token (rate-limited: 10/min) |
 
-### Protected APIs (ต้อง Login + JWT)
+### Protected (JWT Required)
 
-| Method | Endpoint | รายละเอียด |
-|---|---|---|
-| `GET` | `/api/dashboard` | ดึงข้อมูล Dashboard |
-| `GET/POST/PUT/DELETE` | `/api/rooms` | CRUD ห้องพัก |
-| `GET/POST/PUT/DELETE` | `/api/bookings` | CRUD การจอง |
-| `GET/POST/PUT/DELETE` | `/api/transactions` | CRUD ธุรกรรม |
-| `GET/POST/PUT/DELETE` | `/api/users` | CRUD ผู้ใช้/พนักงาน (Admin/Manager) |
-| `GET/POST/PUT` | `/api/attendance` | บันทึก/ดูเวลาเข้า-ออกงาน |
-| `GET` | `/api/reports` | รายงานทางการเงิน |
-| `GET` | `/health` | Health Check |
+| Method | Endpoint | Validation | Description |
+|:-------|:---------|:-----------|:------------|
+| `GET` | `/api/dashboard` | — | Dashboard KPIs + charts |
+| `GET/POST/PUT/DELETE` | `/api/rooms/:id` | `createRoomSchema` · `updateRoomSchema` | Room CRUD |
+| `GET/POST` | `/api/bookings` | `createBookingSchema` | Booking management |
+| `PUT` | `/api/bookings/:id/status` | `updateBookingStatusSchema` | Status transitions |
+| `GET/POST/PUT/DELETE` | `/api/transactions/:id` | `createTransactionSchema` · `updateTransactionSchema` | Financial transactions |
+| `GET/POST/DELETE` | `/api/users/staff/:id` | `createUserSchema` | Staff management (Admin only) |
+| `GET/POST` | `/api/attendance` | — | Clock in/out + history |
+| `GET` | `/api/reports/financial` | — | Monthly P&L report |
 
 ---
 
 ## 🛡 Role-Based Access Control (RBAC)
 
-ระบบรองรับ **6 บทบาท (Roles)** แต่ละบทบาทจะเห็นเมนูและเข้าถึงฟีเจอร์ได้แตกต่างกัน:
-
-| เมนู / ฟีเจอร์ | `admin` | `manager` | `receptionist` | `housekeeper` | `maintenance` | `accountant` |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|
-| Dashboard | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Room Management | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Room Status | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Room Calendar | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Booking Management | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ |
-| Staff Management | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Attendance | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Expenses | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-| Transactions | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-| Financial Report | ✅ | ✅ | ❌ | ❌ | ❌ | ✅ |
-
-> **สรุป:**
-> - **Admin & Manager** — เข้าถึงได้ทุกเมนู
-> - **Receptionist** — จัดการห้องพักและการจอง, ไม่เห็น Staff Management / Financial
-> - **Housekeeper & Maintenance** — เห็นเฉพาะ Room Status + Attendance
-> - **Accountant** — เห็นเฉพาะ Expenses / Transactions / Financial Report
+| Feature | Admin | Manager | Receptionist | Housekeeper | Maintenance | Accountant |
+|:--------|:-----:|:-------:|:------------:|:-----------:|:-----------:|:----------:|
+| Dashboard | ✅ | ✅ | ✅ | — | — | — |
+| Room Management | ✅ | ✅ | ✅ | — | — | — |
+| Room Status | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| Room Calendar | ✅ | ✅ | ✅ | — | — | — |
+| Bookings | ✅ | ✅ | ✅ | — | — | — |
+| Staff Management | ✅ | ✅ | — | — | — | — |
+| Attendance | ✅ | ✅ | ✅ | ✅ | ✅ | — |
+| Expenses | ✅ | ✅ | — | — | — | ✅ |
+| Transactions | ✅ | ✅ | — | — | — | ✅ |
+| Financial Report | ✅ | ✅ | — | — | — | ✅ |
 
 ---
 
-## 🚀 การติดตั้งและรันโปรเจกต์
+## 🚀 Getting Started
 
-### ข้อกำหนดเบื้องต้น (Prerequisites)
+### Prerequisites
 
-- **Node.js** ≥ 18
-- **MySQL** ≥ 8.0
-- **npm** ≥ 9
+- **Node.js** ≥ 20 &nbsp;·&nbsp; **MySQL** ≥ 8.0 &nbsp;·&nbsp; **npm** ≥ 9
 
-### 1) ตั้งค่าฐานข้อมูล (Database)
+### Quick Start (Local)
 
 ```bash
-# Import schema
-mysql -u root -p < server/database_schema.sql
+# 1. Clone
+git clone https://github.com/your-username/myhotel.git && cd myhotel
+
+# 2. Install dependencies
+cd server && npm install && cd ../client && npm install && cd ..
+
+# 3. Configure environment
+cp server/.env.example server/.env     # Edit JWT_SECRET & DB credentials
+
+# 4. Setup database & seed demo data
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS hotel_db"
+cd server && npm run seed              # Creates tables + demo users/rooms/bookings
+
+# 5. Start both servers
+cd server && npm run dev &             # API → http://localhost:5000
+cd client && npm run dev &             # UI  → http://localhost:5173
 ```
 
-สร้างไฟล์ `.env` ในโฟลเดอร์ `server/`:
+**Demo Credentials:**
+| Role | Email | Password |
+|:-----|:------|:---------|
+| Admin | `admin@hotel.com` | `123456` |
+| Receptionist | `reception@hotel.com` | `123456` |
 
-```env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=hotel_management_system
-DB_PORT=3306
-JWT_SECRET=your_jwt_secret_key
-PORT=3000
-```
-
-> ⚠️ **สำคัญ:** อย่าลืมอัปเดต ENUM ของ `users.role` ให้รองรับ 6 roles:
->
-> ```sql
-> ALTER TABLE users
-> MODIFY COLUMN role ENUM(
->   'admin',
->   'manager',
->   'receptionist',
->   'housekeeper',
->   'maintenance',
->   'accountant'
-> ) NOT NULL;
-> ```
->
-> ถ้ามีข้อมูลเก่า `role='staff'` ให้ migrate ก่อน:
->
-> ```sql
-> UPDATE users SET role = 'receptionist' WHERE role = 'staff';
-> ```
-
-### 2) รัน Server (Backend)
+### Docker Compose (One Command)
 
 ```bash
-cd server
-npm install
-npm run dev        # Development (nodemon)
-# หรือ
-npm start          # Production
+# Build & run everything (MySQL + API + Nginx)
+docker compose up -d
+
+# App available at http://localhost
+# API available at http://localhost:5000
 ```
-
-Server จะรันที่ `http://localhost:3000`
-
-### 3) รัน Client (Frontend)
-
-```bash
-cd client
-npm install
-npm run dev
-```
-
-Client จะรันที่ `http://localhost:5173`
-
-### 4) ทดสอบ
-
-เปิดเบราว์เซอร์ไปที่ `http://localhost:5173` เพื่อเข้าสู่หน้า Customer Home
-
-- **เข้าสู่ระบบพนักงาน:** ไปที่ `/staff/login`
-- **จองห้องพัก (Guest):** ไปที่ `/book`
-- **ตรวจสอบสถานะการจอง:** ไปที่ `/booking-status`
 
 ---
 
 ## 📸 Screenshots
 
-### Public — หน้าสำหรับลูกค้า
+### Public — Guest Experience
 
-#### Landing / Customer Home
+| Landing Page | Guest Booking | Booking Status |
+|:---:|:---:|:---:|
+| ![Landing](docs/screenshots/public-home.png) | ![Booking](docs/screenshots/public-guest-booking-step1.jpg) | ![Status](docs/screenshots/public-booking-status.jpg) |
 
-![Public Home](docs/screenshots/public-home.png)
+### Admin — Management Dashboard
 
-#### Guest Booking (Step 1 — เลือกห้อง)
+| Dashboard | Room Management | Booking Management |
+|:---:|:---:|:---:|
+| ![Dashboard](docs/screenshots/admin-dashboard.jpg) | ![Rooms](docs/screenshots/admin-room-management.jpg) | ![Bookings](docs/screenshots/admin-bookings.jpg) |
 
-![Guest Booking Step 1](docs/screenshots/public-guest-booking-step1.jpg)
-
-#### Guest Booking (Step 2 — กรอกข้อมูล)
-
-![Guest Booking Step 2](docs/screenshots/public-guest-booking-step2.jpg)
-
-#### Booking Status (ตรวจสอบการจอง)
-
-![Booking Status](docs/screenshots/public-booking-status.jpg)
-
----
-
-### Admin / Staff — หน้าสำหรับพนักงาน
-
-#### Dashboard
-
-![Admin Dashboard](docs/screenshots/admin-dashboard.jpg)
-
-#### Room Status (Read-only)
-
-![Room Status](docs/screenshots/admin-room-status.jpg)
-
-#### Room Management
-
-![Room Management](docs/screenshots/admin-room-management.jpg)
-
-#### Booking Management
-
-![Booking Management](docs/screenshots/admin-bookings.jpg)
-
-#### Room Calendar (Gantt-style)
-
-![Room Calendar](docs/screenshots/admin-calendar.jpg)
-
-#### Attendance (เข้า-ออกงาน)
-
-![Attendance](docs/screenshots/admin-attendance.jpg)
-
-#### Expenses (ค่าใช้จ่าย)
-
-![Expenses](docs/screenshots/admin-expenses.jpg)
-
-#### Transactions (ธุรกรรม)
-
-![Transactions](docs/screenshots/admin-transactions.jpg)
-
-#### Financial Report (รายงานการเงิน)
-
-![Financial Report](docs/screenshots/admin-financial-report.jpg)
-
----
-
-## 📝 หมายเหตุ
-
-- ฝั่ง Client เรียก API ที่ `http://localhost:3000` (สามารถเปลี่ยนได้ผ่าน Service files ใน `client/src/services/`)
-- ถ้าจะ Deploy จริง แนะนำให้ตั้ง `BASE_URL` เป็น **Environment Variable** แทน hardcode
-- Schema SQL อยู่ที่ `server/database_schema.sql` สามารถ import ได้โดยตรง
-- ระบบใช้ **JWT** เก็บไว้ใน Client side เพื่อ Authenticate ทุก API request
+| Room Calendar | Financial Report | Transactions |
+|:---:|:---:|:---:|
+| ![Calendar](docs/screenshots/admin-calendar.jpg) | ![Report](docs/screenshots/admin-financial-report.jpg) | ![Transactions](docs/screenshots/admin-transactions.jpg) |
 
 ---
 
 ## 📄 License
 
-ISC
+MIT
