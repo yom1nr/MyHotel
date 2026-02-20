@@ -7,7 +7,7 @@ type PublicRoom = { id: number; room_number: string; room_type: 'standard' | 'de
 type Step = 1 | 2 | 3 | 4
 type GuestInfo = { name: string; phone: string; email: string }
 
-const API_BASE_URL = 'http://localhost:3000'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 function calcNights(checkIn: string, checkOut: string) {
   if (!checkIn || !checkOut) return 0

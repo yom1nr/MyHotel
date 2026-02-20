@@ -37,7 +37,7 @@ export default function LandingPage() {
               </Link>
             </div>
 
-            <div className="mt-8 text-xs text-slate-500">Hotel Booking System</div>
+            <div className="mt-8 text-xs text-slate-500">Hotel Brunelleschi</div>
           </div>
         </div>
       </div>

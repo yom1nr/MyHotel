@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { login } from '../services/authService'
 import Button from '../components/ui/Button'
+import HotelLogo from '../components/HotelLogo'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -39,11 +40,9 @@ export default function Login() {
           {/* Left panel */}
           <div className="hidden p-10 text-white md:flex md:flex-col md:justify-between" style={{ background: 'linear-gradient(135deg, #0c1222 0%, #131b35 50%, #0f1628 100%)' }}>
             <div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-lg font-bold shadow-lg shadow-indigo-500/20">
-                H
-              </div>
+              <HotelLogo size={48} className="rounded-xl shadow-lg shadow-indigo-500/20" />
               <div className="mt-8 text-2xl font-bold">
-                <span className="gradient-text">Hotel Management</span>
+                <span className="gradient-text">Hotel Brunelleschi</span>
               </div>
               <div className="mt-3 text-sm text-slate-400 leading-relaxed">
                 Sign in to manage rooms, bookings, staff, and reports.

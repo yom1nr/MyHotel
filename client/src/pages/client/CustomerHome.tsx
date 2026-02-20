@@ -2,7 +2,6 @@ import {
   AirVent,
   Car,
   ConciergeBell,
-  Crown,
   MapPin,
   Search,
   ShieldCheck,
@@ -15,6 +14,7 @@ import { Link } from 'react-router-dom'
 import { getRooms } from '../../services/roomService'
 import type { Room } from '../../types/room'
 import { formatCurrencyTHB } from '../../utils/format'
+import HotelLogo from '../../components/HotelLogo'
 
 export default function CustomerHome() {
   const [rooms, setRooms] = useState<Room[]>([])
@@ -63,11 +63,9 @@ export default function CustomerHome() {
       <header className="border-b border-white/[0.06]">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 shadow-lg shadow-indigo-500/20">
-              <Crown className="h-5 w-5 text-white" />
-            </div>
+            <HotelLogo size={40} className="rounded-xl shadow-lg shadow-indigo-500/20" />
             <div className="leading-tight">
-              <div className="text-sm font-semibold">Grand Hotel</div>
+              <div className="text-sm font-semibold">Hotel Brunelleschi</div>
               <div className="text-xs text-slate-500">Luxury stays, seamless booking</div>
             </div>
           </div>
@@ -220,7 +218,7 @@ export default function CustomerHome() {
       {/* Footer */}
       <footer className="border-t border-white/[0.06]">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-4 py-8 text-xs text-slate-500">
-          <div>© {new Date().getFullYear()} Grand Hotel</div>
+          <div>© {new Date().getFullYear()} Hotel Brunelleschi</div>
           <div className="hidden items-center gap-2 sm:flex">
             <Sparkles className="h-4 w-4 text-indigo-400" />
             Luxury stay at best price

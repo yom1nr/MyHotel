@@ -1,6 +1,6 @@
-# 🏨 MyHotel — Enterprise Hotel Management System
+# 🏨 Hotel Brunelleschi — Enterprise Hotel Management System
 
-> **Full-stack hotel management platform** built with **React 19 · Express 5 · MySQL 8** featuring dark-glass enterprise UI, layered backend architecture, Zod validation, JWT RBAC, and Docker-ready deployment.
+> **Full-stack hotel management platform** built with **React 19 · Express 5 · MySQL 8** featuring dark-glass enterprise UI, custom SVG branding, layered backend architecture, Zod validation, JWT RBAC, environment-based config, and Docker-ready deployment.
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" />
@@ -128,9 +128,12 @@
 ```
 myhotel/
 ├── client/                          # Frontend (React 19 + TypeScript + Vite)
+│   ├── public/
+│   │   └── logo.svg                 # Hotel Brunelleschi SVG logo (favicon + brand)
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── ui/                  # Design system (Button, Card, Modal, Badge, etc.)
+│   │   │   ├── HotelLogo.tsx        # Reusable SVG logo component
 │   │   │   ├── Sidebar.tsx          # Collapsible admin sidebar
 │   │   │   └── ClockWidget.tsx      # Staff attendance clock
 │   │   ├── layouts/
@@ -144,8 +147,12 @@ myhotel/
 │   │   │   ├── Staff.tsx            # Staff management (admin only)
 │   │   │   ├── FinancialReport.tsx  # Revenue vs expense charts
 │   │   │   └── ...
-│   │   ├── services/                # API client layer (fetch wrappers)
+│   │   ├── lib/
+│   │   │   └── api.ts               # Axios instance with interceptors
+│   │   ├── services/                # API client layer (uses VITE_API_URL env)
 │   │   └── types/                   # Shared TypeScript interfaces
+│   ├── .env                         # VITE_API_URL (not committed)
+│   ├── .env.example                 # Environment template for team
 │   ├── Dockerfile                   # Multi-stage build (Node → Nginx)
 │   └── nginx.conf                   # SPA routing + API proxy
 │
@@ -292,22 +299,31 @@ erDiagram
 
 ```bash
 # 1. Clone
-git clone https://github.com/your-username/myhotel.git && cd myhotel
+git clone https://github.com/yom1nr/MyHotel.git && cd MyHotel
 
 # 2. Install dependencies
 cd server && npm install && cd ../client && npm install && cd ..
 
 # 3. Configure environment
 cp server/.env.example server/.env     # Edit JWT_SECRET & DB credentials
+cp client/.env.example client/.env     # API URL (default: http://localhost:5000)
 
 # 4. Setup database & seed demo data
-mysql -u root -e "CREATE DATABASE IF NOT EXISTS hotel_db"
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS hotel_management_system"
 cd server && npm run seed              # Creates tables + demo users/rooms/bookings
 
 # 5. Start both servers
 cd server && npm run dev &             # API → http://localhost:5000
 cd client && npm run dev &             # UI  → http://localhost:5173
 ```
+
+**Environment Variables:**
+| File | Variable | Default | Description |
+|:-----|:---------|:--------|:------------|
+| `server/.env` | `PORT` | `5000` | API server port |
+| `server/.env` | `DB_HOST` | `localhost` | MySQL host |
+| `server/.env` | `JWT_SECRET` | — | **Must change in production** |
+| `client/.env` | `VITE_API_URL` | `http://localhost:5000` | Backend API base URL |
 
 **Demo Credentials:**
 | Role | Email | Password |

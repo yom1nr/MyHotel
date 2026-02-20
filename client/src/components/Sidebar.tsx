@@ -15,6 +15,7 @@ import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import { clearToken, getCurrentUser, getRole } from '../services/authService'
+import HotelLogo from './HotelLogo'
 
 type NavItem = {
   key: string
@@ -72,12 +73,10 @@ export default function Sidebar() {
       }}
     >
       <div className="flex items-center gap-3 px-4 py-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-sm font-bold text-white shadow-lg shadow-indigo-500/20">
-          H
-        </div>
+        <HotelLogo size={36} className="shrink-0 rounded-xl shadow-lg shadow-indigo-500/20" />
         {!collapsed && (
           <div className="leading-tight overflow-hidden">
-            <div className="text-sm font-semibold text-white truncate">Hotel Admin</div>
+            <div className="text-sm font-semibold text-white truncate">Hotel Brunelleschi</div>
             <div className="text-[11px] text-slate-500">Management System</div>
           </div>
         )}

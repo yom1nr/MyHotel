@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { login } from '../../services/authService'
+import HotelLogo from '../../components/HotelLogo'
 
 export default function CustomerLogin() {
   const navigate = useNavigate()
@@ -24,8 +25,8 @@ export default function CustomerLogin() {
       <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4 py-10">
         <div className="grid w-full grid-cols-1 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] shadow-2xl backdrop-blur md:grid-cols-2">
           <div className="hidden bg-gradient-to-br from-navy-800 via-navy-900 to-navy-800 p-10 text-white md:block">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 text-lg font-bold text-white">G</div>
-            <div className="mt-6 text-2xl font-bold">Grand Hotel</div>
+            <HotelLogo size={48} className="rounded-xl" />
+            <div className="mt-6 text-2xl font-bold">Hotel Brunelleschi</div>
             <div className="mt-2 text-sm text-slate-400">เข้าสู่ระบบเพื่อจองห้องพักและตรวจสอบสถานะการจอง</div>
             <div className="mt-10 space-y-3">
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
