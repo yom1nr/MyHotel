@@ -52,8 +52,30 @@
 
   select,
   select option {
-    background-color: #1e293b;
-    color: #f1f5f9;
+    background-color: #1e293b !important;
+    color: #f1f5f9 !important;
+  }
+
+  input[type='date'],
+  input[type='datetime-local'] {
+    color-scheme: dark;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  select:-webkit-autofill {
+    -webkit-text-fill-color: #f1f5f9;
+    -webkit-box-shadow: 0 0 0 1000px #1e293b inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* make form inputs more visible inside dark modals */
+  select,
+  .fixed input,
+  .fixed select,
+  .fixed textarea {
+    background-color: rgba(30, 41, 59, 0.7) !important;
   }
 }
 
