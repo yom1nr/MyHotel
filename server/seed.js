@@ -139,7 +139,8 @@ async function seed() {
                 full_name: 'Reception Staff',
                 email: 'reception@hotel.com',
                 password_hash: hash,
-                role: 'receptionist',
+                role: 'staff',
+                staff_position: 'reception',
                 is_active: 1,
             })
             console.log('✅ Receptionist created (reception@hotel.com / 123456)')

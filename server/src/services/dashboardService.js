@@ -69,7 +69,7 @@ async function getRevenueByMonth(months = 6) {
     FROM transactions t
     WHERE t.type = 'payment' AND t.status = 'paid'
       AND t.transaction_date >= DATE_SUB(CURDATE(), INTERVAL ? MONTH)
-    GROUP BY DATE_FORMAT(t.transaction_date, '%Y-%m')
+    GROUP BY DATE_FORMAT(t.transaction_date, '%Y-%m-01')
     ORDER BY month ASC`,
     [months - 1]
   )
