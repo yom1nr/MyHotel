@@ -139,7 +139,8 @@ async function getBookings() {
         `SELECT b.id, b.booking_code, b.user_id, b.guest_full_name, b.guest_phone,
             b.guest_email, b.room_id, b.check_in_date, b.check_out_date,
             b.nights, b.total_amount, b.status, b.notes, b.created_at, b.updated_at,
-            r.room_number, r.room_type
+            r.room_number, r.room_type,
+            (SELECT COALESCE(SUM(amount), 0) FROM transactions t WHERE t.booking_id = b.id AND t.type = 'payment' AND t.status = 'paid') as paid_amount
      FROM bookings b JOIN rooms r ON r.id = b.room_id
      ORDER BY b.created_at DESC LIMIT 500`
     )
@@ -183,22 +184,24 @@ async function updateBookingStatus(id, status, paymentMethod = 'cash') {
         }
 
         if (status === 'checked_out' && booking.status !== 'checked_out') {
-            const [existingTx] = await conn.query(
-                "SELECT id FROM transactions WHERE booking_id = ? AND type = 'payment' LIMIT 1",
+            const [[{ paidAmount }]] = await conn.query(
+                "SELECT COALESCE(SUM(amount), 0) AS paidAmount FROM transactions WHERE booking_id = ? AND type = 'payment' AND status = 'paid'",
                 [numId]
             )
 
-            if (existingTx.length === 0) {
+            const remainingBalance = Number(booking.total_amount) - Number(paidAmount)
+
+            if (remainingBalance > 0) {
                 const txCode = generateTransactionCode()
                 await conn.query('INSERT INTO transactions SET ?', {
                     booking_id: numId,
                     transaction_code: txCode,
                     type: 'payment',
                     method: paymentMethod,
-                    amount: Number(booking.total_amount),
+                    amount: remainingBalance,
                     status: 'paid',
                     transaction_date: new Date(),
-                    reference_note: 'Auto payment on checkout',
+                    reference_note: remainingBalance < Number(booking.total_amount) ? 'Remaining payment on checkout' : 'Auto payment on checkout',
                 })
             }
         }
@@ -235,4 +238,50 @@ async function getBookingByCode(code, phone) {
     return rows[0]
 }
 
-module.exports = { createBooking, createPublicBooking, getBookings, updateBookingStatus, getBookingByCode }
+async function payDeposit(code, phone) {
+    if (!code) throw new ValidationError('Booking code is required')
+    if (!phone) throw new ValidationError('Phone number is required')
+
+    const [rows] = await db.query(
+        `SELECT id, total_amount, status FROM bookings WHERE booking_code = ? AND guest_phone = ? LIMIT 1`,
+        [code.trim(), phone.trim()]
+    )
+
+    if (!rows?.[0]) throw new NotFoundError('Booking')
+    const booking = rows[0]
+
+    if (booking.status !== 'pending') {
+        throw new AppError('Booking is not in pending state', 400, 'INVALID_STATUS')
+    }
+
+    const depositAmount = Math.ceil(Number(booking.total_amount) * 0.5)
+
+    const conn = await db.getConnection()
+    try {
+        await conn.beginTransaction()
+
+        await conn.query("UPDATE bookings SET status = 'confirmed' WHERE id = ?", [booking.id])
+
+        const txCode = generateTransactionCode()
+        await conn.query('INSERT INTO transactions SET ?', {
+            booking_id: booking.id,
+            transaction_code: txCode,
+            type: 'payment',
+            method: 'promptpay',
+            amount: depositAmount,
+            status: 'paid',
+            transaction_date: new Date(),
+            reference_note: 'Deposit payment',
+        })
+
+        await conn.commit()
+        return { success: true, booking_id: booking.id }
+    } catch (err) {
+        await conn.rollback()
+        throw err
+    } finally {
+        conn.release()
+    }
+}
+
+module.exports = { createBooking, createPublicBooking, getBookings, updateBookingStatus, getBookingByCode, payDeposit }

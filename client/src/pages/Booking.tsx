@@ -5,6 +5,7 @@ import type { Booking, BookingCreateInput, BookingStatus } from '../types/bookin
 import type { Room } from '../types/room'
 import { createBooking, getBookings, updateBookingStatus } from '../services/bookingService'
 import { getRooms } from '../services/roomService'
+import { generatePromptPayQR } from '../services/paymentService'
 import { formatCurrencyTHB, formatDateShort } from '../utils/format'
 
 import PageHeader from '../components/ui/PageHeader'
@@ -58,7 +59,38 @@ export default function BookingPage() {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<BookingFormState>(emptyForm)
   const [checkoutBookingId, setCheckoutBookingId] = useState<number | null>(null)
-  const [checkoutPaymentMethod, setCheckoutPaymentMethod] = useState<'cash' | 'transfer' | 'card'>('cash')
+  const [checkoutPaymentMethod, setCheckoutPaymentMethod] = useState<'cash' | 'transfer' | 'card' | 'promptpay'>('cash')
+  const [checkoutQrUrl, setCheckoutQrUrl] = useState<string | null>(null)
+
+  const checkoutBooking = useMemo(() => {
+    if (!checkoutBookingId) return null
+    return bookings.find(b => b.id === checkoutBookingId) || null
+  }, [checkoutBookingId, bookings])
+
+  const checkoutRemainingBalance = useMemo(() => {
+    if (!checkoutBooking) return 0
+    const remaining = Number(checkoutBooking.total_amount) - Number(checkoutBooking.paid_amount || 0)
+    return remaining > 0 ? remaining : 0
+  }, [checkoutBooking])
+
+  useEffect(() => {
+    let active = true
+    async function loadQr() {
+      if (checkoutBookingId && checkoutPaymentMethod === 'promptpay' && checkoutRemainingBalance > 0) {
+        try {
+          setCheckoutQrUrl(null)
+          const qrData = await generatePromptPayQR(checkoutRemainingBalance, checkoutBookingId)
+          if (active) setCheckoutQrUrl(qrData.qrCodeUrl)
+        } catch (e) {
+          if (active) toast.error('Generate QR Error')
+        }
+      } else {
+        setCheckoutQrUrl(null)
+      }
+    }
+    loadQr()
+    return () => { active = false }
+  }, [checkoutBookingId, checkoutPaymentMethod, checkoutRemainingBalance])
 
   async function refresh() {
     const [bookingData, roomData] = await Promise.all([getBookings(), getRooms()])
@@ -214,12 +246,46 @@ export default function BookingPage() {
         <div className="space-y-4">
           <div>
             <label className="mb-2 block text-xs font-medium text-slate-400">ช่องทางการชำระเงิน</label>
-            <select value={checkoutPaymentMethod} onChange={(e) => setCheckoutPaymentMethod(e.target.value as 'cash' | 'transfer' | 'card')} className={inputCls}>
+            <select value={checkoutPaymentMethod} onChange={(e) => setCheckoutPaymentMethod(e.target.value as 'cash' | 'transfer' | 'card' | 'promptpay')} className={inputCls} disabled={checkoutRemainingBalance <= 0}>
               <option value="cash">เงินสด (Cash)</option>
               <option value="transfer">โอนเงิน (Transfer)</option>
               <option value="card">บัตรเครดิต/เดบิต (Card)</option>
+              <option value="promptpay">พร้อมเพย์ QR Code (PromptPay)</option>
             </select>
           </div>
+
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-sm text-slate-300">
+            <div className="flex justify-between">
+              <span>ยอดรวมทั้งหมด</span>
+              <span>{formatCurrencyTHB(Number(checkoutBooking?.total_amount || 0))}</span>
+            </div>
+            <div className="mt-2 flex justify-between text- emerald-400">
+              <span>ชำระแล้ว</span>
+              <span>{formatCurrencyTHB(Number(checkoutBooking?.paid_amount || 0))}</span>
+            </div>
+            <div className="mt-3 flex justify-between font-bold text-white border-t border-white/[0.1] pt-3">
+              <span>ยอดที่ต้องชำระเพิ่ม</span>
+              <span className={checkoutRemainingBalance > 0 ? "text-indigo-400" : "text-emerald-400"}>
+                {checkoutRemainingBalance > 0 ? formatCurrencyTHB(checkoutRemainingBalance) : 'ครบแล้ว (0 ฿)'}
+              </span>
+            </div>
+          </div>
+
+          {checkoutPaymentMethod === 'promptpay' && checkoutRemainingBalance > 0 && (
+            <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.03] p-4 text-center">
+              <div className="text-xs text-slate-400">สแกนชำระเงินส่วนที่เหลือ ({formatCurrencyTHB(checkoutRemainingBalance)})</div>
+              {checkoutQrUrl ? (
+                <div className="mt-4 flex justify-center">
+                  <div className="rounded-xl bg-white p-2">
+                    <img src={checkoutQrUrl} alt="QR Code" className="w-48 h-48 object-contain" />
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4 text-xs text-slate-500">กำลังสร้าง QR Code...</div>
+              )}
+              <div className="mt-4 text-xs text-slate-500">(จำลองชำระเงิน: กดปุ่ม ยืนยัน Check-out ด้านล่างเมื่อลูกค้าโอนเงินสำเร็จ)</div>
+            </div>
+          )}
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button type="button" variant="secondary" onClick={() => !saving && setCheckoutBookingId(null)} disabled={saving}>ยกเลิก</Button>
             <Button onClick={async () => {

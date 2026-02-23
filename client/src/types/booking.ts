@@ -26,6 +26,8 @@ export interface Booking {
   room_type: 'standard' | 'deluxe' | 'suite'
   base_price: number
 
+  paid_amount?: number | string
+
   user_full_name: string | null
   user_email: string | null
 }

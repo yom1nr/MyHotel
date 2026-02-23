@@ -52,6 +52,7 @@ app.use('/api/reports', reportRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/attendance', attendanceRoutes)
 app.use('/api', indexRoutes)
+app.use('/api/payment', require('./routes/paymentRoutes'));
 
 app.get('/health', (_req, res) => {
   res.json({

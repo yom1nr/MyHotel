@@ -28,4 +28,9 @@ const getBookingByCode = asyncHandler(async (req, res) => {
   return success(res, booking)
 })
 
-module.exports = { createBooking, createPublicBooking, getBookings, updateBookingStatus, getBookingByCode }
+const payDeposit = asyncHandler(async (req, res) => {
+  const data = await bookingService.payDeposit(req.params.code, req.body.phone)
+  return success(res, data)
+})
+
+module.exports = { createBooking, createPublicBooking, getBookings, updateBookingStatus, getBookingByCode, payDeposit }

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-
 import { formatCurrencyTHB } from '../../utils/format'
 
 import { createPublicBooking } from '../../services/bookingService'
 import { getPublicRooms } from '../../services/roomService'
+import { generatePromptPayQR, payPublicDeposit } from '../../services/paymentService'
 
-type Step = 1 | 2 | 3 | 4
+type Step = 1 | 2 | 3 | 4 | 5
 type GuestInfo = { name: string; phone: string; email: string }
 
 function calcNights(checkIn: string, checkOut: string) {
@@ -32,6 +32,8 @@ export default function GuestBooking() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [bookingCode, setBookingCode] = useState<string | null>(null)
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null)
+  const [depositAmount, setDepositAmount] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -64,9 +66,29 @@ export default function GuestBooking() {
     try {
       setSubmitting(true); setSubmitError(null)
       const data = await createPublicBooking({ room_id: selectedRoomId, check_in_date: checkIn, check_out_date: checkOut, guest_name: guest.name, guest_phone: guest.phone, guest_email: guest.email || null })
-      setBookingCode(data.booking_code); setStep(4)
+      setBookingCode(data.booking_code)
+
+      const deposit = Math.ceil(total * 0.5)
+      setDepositAmount(deposit)
+      const qrData = await generatePromptPayQR(deposit, data.booking_code)
+      setQrCodeUrl(qrData.qrCodeUrl)
+
+      setStep(4)
     } catch (e) { setSubmitError(e instanceof Error ? e.message : 'จองไม่สำเร็จ') }
     finally { setSubmitting(false) }
+  }
+
+  async function onSimulateDeposit() {
+    if (!bookingCode || !guest.phone) return
+    try {
+      setSubmitting(true); setSubmitError(null)
+      await payPublicDeposit(bookingCode, guest.phone)
+      setStep(5)
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : 'ชำระเงินไม่สำเร็จ')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const inputCls = 'mt-2 w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20'
@@ -92,8 +114,8 @@ export default function GuestBooking() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur">
-              <div className="text-xs font-semibold text-slate-500">Step {step}/4</div>
-              <div className="mt-1 text-lg font-extrabold tracking-tight">{step === 1 ? 'เลือกห้องและวันที่' : step === 2 ? 'ข้อมูลผู้เข้าพัก' : step === 3 ? 'ยืนยันการจอง' : 'สำเร็จ'}</div>
+              <div className="text-xs font-semibold text-slate-500">Step {step}/5</div>
+              <div className="mt-1 text-lg font-extrabold tracking-tight">{step === 1 ? 'เลือกห้องและวันที่' : step === 2 ? 'ข้อมูลผู้เข้าพัก' : step === 3 ? 'ยืนยันการจอง' : step === 4 ? 'ชำระเงินมัดจำ' : 'สำเร็จ'}</div>
 
               {submitError ? <div className="mt-4 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-xs text-rose-300">{submitError}</div> : null}
 
@@ -152,15 +174,41 @@ export default function GuestBooking() {
                   </div>
                   <div className="flex items-center justify-between"><button type="button" onClick={() => setStep(2)} className={btnGhost}>ย้อนกลับ</button><button type="button" disabled={submitting} onClick={onSubmitBooking} className={btnPrimary + ' disabled:opacity-70'}>{submitting ? 'กำลังส่ง...' : 'ยืนยันการจอง'}</button></div>
                 </div>
+              ) : step === 4 ? (
+                <div className="mt-6 space-y-4">
+                  <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-6 text-center">
+                    <div className="text-sm font-semibold text-slate-300">ชำระเงินมัดจำ (50%)</div>
+                    <div className="mt-1 text-2xl font-extrabold text-indigo-400">{formatCurrencyTHB(depositAmount)}</div>
+
+                    {qrCodeUrl ? (
+                      <div className="mt-6 flex justify-center">
+                        <div className="rounded-xl bg-white p-4">
+                          <img src={qrCodeUrl} alt="PromptPay QR Code" className="w-48 h-48 object-contain" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-6 text-sm text-slate-500">กำลังสร้าง QR Code...</div>
+                    )}
+
+                    <div className="mt-6 text-xs text-slate-400">
+                      สแกนด้วยแอปพลิเคชันธนาคารเพื่อชำระเงิน<br />
+                      (นี่คือระบบทดสอบ กดปุ่มด้านล่างเพื่อจำลองการจ่ายเงินสำเร็จ)
+                    </div>
+                  </div>
+                  <div className="flex justify-center mt-6">
+                    <button type="button" disabled={submitting} onClick={onSimulateDeposit} className={btnPrimary + ' w-full sm:w-auto disabled:opacity-70'}>
+                      {submitting ? 'กำลังตรวจสอบ...' : 'ฉันสแกนจ่ายเรียบร้อยแล้ว (Simulate Payment)'}
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <div className="mt-6">
-                  <div className="rounded-xl bg-gradient-to-br from-indigo-500/15 to-cyan-500/10 p-8 ring-1 ring-indigo-500/20">
-                    <div className="text-xs font-semibold text-slate-400">Success</div>
-                    <div className="mt-2 text-2xl font-extrabold">จองสำเร็จ</div>
+                  <div className="rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/10 p-8 ring-1 ring-emerald-500/20">
+                    <div className="text-xs font-semibold text-emerald-400">Success</div>
+                    <div className="mt-2 text-2xl font-extrabold">จองสําเร็จ ระบบได้รับเงินมัดจำแล้ว</div>
                     <div className="mt-4 text-xs text-slate-400">Booking Code</div>
-                    <div className="mt-2 inline-flex rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 px-5 py-3 text-lg font-extrabold text-white">{bookingCode}</div>
-                    <div className="mt-4 text-sm text-slate-400">Please save this code to check your status.</div>
-                    <div className="mt-4 text-sm text-slate-400">กรุณาบันทึกโค้ดนี้เพื่อใช้ตรวจสอบสถานะการจอง</div>
+                    <div className="mt-2 inline-flex rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 text-lg font-extrabold text-white">{bookingCode}</div>
+                    <div className="mt-4 text-sm text-slate-400">กรุณาบันทึกโค้ดนี้เพื่อใช้ตรวจสอบสถานะการจอง และสแกนส่วนที่เหลือเมื่อ Check-out</div>
                     <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                       <Link to="/booking-status" className="rounded-xl bg-white px-6 py-3 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-100">ไปเช็คสถานะการจอง</Link>
                       <Link to="/" className={btnGhost + ' text-center'}>กลับหน้า Home</Link>
