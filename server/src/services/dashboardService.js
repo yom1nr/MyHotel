@@ -14,7 +14,7 @@ async function getOccupiedRooms() {
 
 async function getTotalRevenue() {
   const [[row]] = await db.query(
-    'SELECT COALESCE(SUM(amount), 0) AS totalRevenue FROM transactions'
+    "SELECT COALESCE(SUM(amount), 0) AS totalRevenue FROM transactions WHERE type = 'payment' AND status = 'paid'"
   )
   return Number(row?.totalRevenue || 0)
 }
@@ -71,7 +71,7 @@ async function getRevenueByMonth(months = 6) {
       AND t.transaction_date >= DATE_SUB(CURDATE(), INTERVAL ? MONTH)
     GROUP BY DATE_FORMAT(t.transaction_date, '%Y-%m-01')
     ORDER BY month ASC`,
-    [months - 1]
+    [months]
   )
 
   return rows.map((r) => ({

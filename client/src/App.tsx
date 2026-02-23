@@ -18,6 +18,7 @@ import GuestBooking from './pages/client/GuestBooking'
 import RoomCalendar from './pages/RoomCalendar'
 import RoomManagement from './pages/RoomManagement'
 import Staff from './pages/Staff'
+import Receipt from './pages/client/Receipt'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
       <Route path="/login" element={<LandingPage />} />
       <Route path="/staff/login" element={<Login />} />
       <Route path="/booking-status" element={<BookingStatus />} />
+      <Route path="/receipt/:code" element={<Receipt />} />
       <Route path="/" element={<CustomerHome />} />
       <Route path="/home" element={<Navigate to="/" replace />} />
       <Route path="/book" element={<GuestBooking />} />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { formatCurrencyTHB, formatDateShort } from '../../utils/format'
 
@@ -27,6 +27,7 @@ function badgeForStatus(status: string) {
 }
 
 export default function BookingStatus() {
+  const navigate = useNavigate()
   const [code, setCode] = useState('')
   const [phone, setPhone] = useState('')
   const [loading, setLoading] = useState(false)
@@ -106,6 +107,14 @@ export default function BookingStatus() {
               <div className="p-6">
                 <div className="text-xs text-slate-500">ยอดรวม</div>
                 <div className="mt-1 text-lg font-extrabold text-indigo-300">{formatCurrencyTHB(Number(result.total_amount))}</div>
+                <div className="mt-4">
+                  <button
+                    onClick={() => navigate(`/receipt/${result.booking_code}`, { state: result })}
+                    className="inline-flex w-full justify-center rounded-lg bg-indigo-500/20 px-4 py-2 text-sm font-semibold text-indigo-300 transition hover:bg-indigo-500/30"
+                  >
+                    รายละเอียด / พิมพ์ใบเสร็จ
+                  </button>
+                </div>
               </div>
             </div>
           </div>

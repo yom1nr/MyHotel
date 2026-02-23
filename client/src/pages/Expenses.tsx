@@ -37,8 +37,8 @@ export default function Expenses() {
   }, [])
 
   const summary = useMemo(() => {
-    const income = transactions.filter((t) => t.type === 'payment').reduce((a, t) => a + Number(t.amount), 0)
-    const expense = transactions.filter((t) => t.type === 'expense').reduce((a, t) => a + Number(t.amount), 0)
+    const income = transactions.filter((t) => t.type === 'payment' && t.status === 'paid').reduce((a, t) => a + Number(t.amount), 0)
+    const expense = transactions.filter((t) => t.type === 'expense' && t.status === 'paid').reduce((a, t) => a + Number(t.amount), 0)
     return { income, expense }
   }, [transactions])
 

@@ -162,6 +162,7 @@ export default function GuestBooking() {
                     <div className="mt-4 text-xs text-slate-400">Booking Code</div>
                     <div className="mt-2 inline-flex rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 px-5 py-3 text-lg font-extrabold text-white">{bookingCode}</div>
                     <div className="mt-4 text-sm text-slate-400">Please save this code to check your status.</div>
+                    <div className="mt-4 text-sm text-slate-400">กรุณาบันทึกโค้ดนี้เพื่อใช้ตรวจสอบสถานะการจอง</div>
                     <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                       <Link to="/booking-status" className="rounded-xl bg-white px-6 py-3 text-center text-sm font-semibold text-slate-900 transition hover:bg-slate-100">ไปเช็คสถานะการจอง</Link>
                       <Link to="/" className={btnGhost + ' text-center'}>กลับหน้า Home</Link>

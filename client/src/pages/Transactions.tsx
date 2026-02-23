@@ -58,9 +58,9 @@ export default function Transactions() {
     return () => { cancelled = true }
   }, [])
 
-  const income = useMemo(() => items.filter((t) => t.type === 'payment').reduce((a, t) => a + Number(t.amount), 0), [items])
-  const refund = useMemo(() => items.filter((t) => t.type === 'refund').reduce((a, t) => a + Number(t.amount), 0), [items])
-  const expense = useMemo(() => items.filter((t) => t.type === 'expense').reduce((a, t) => a + Number(t.amount), 0), [items])
+  const income = useMemo(() => items.filter((t) => t.type === 'payment' && t.status === 'paid').reduce((a, t) => a + Number(t.amount), 0), [items])
+  const refund = useMemo(() => items.filter((t) => t.type === 'refund' && t.status === 'paid').reduce((a, t) => a + Number(t.amount), 0), [items])
+  const expense = useMemo(() => items.filter((t) => t.type === 'expense' && t.status === 'paid').reduce((a, t) => a + Number(t.amount), 0), [items])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()

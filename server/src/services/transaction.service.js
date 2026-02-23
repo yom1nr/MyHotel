@@ -75,17 +75,20 @@ async function getFinancialReport() {
     const [[summary]] = await db.query(
         `SELECT
        COALESCE(SUM(CASE WHEN type = 'payment' THEN amount ELSE 0 END), 0) AS totalIncome,
+       COALESCE(SUM(CASE WHEN type = 'refund' THEN amount ELSE 0 END), 0) AS totalRefund,
        COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) AS totalExpense
      FROM transactions WHERE status = 'paid'`
     )
 
     const totalIncome = Number(summary?.totalIncome || 0)
+    const totalRefund = Number(summary?.totalRefund || 0)
     const totalExpense = Number(summary?.totalExpense || 0)
 
     const [monthlyRows] = await db.query(
         `SELECT
        DATE_FORMAT(transaction_date, '%Y-%m') AS month,
        COALESCE(SUM(CASE WHEN type = 'payment' THEN amount ELSE 0 END), 0) AS income,
+       COALESCE(SUM(CASE WHEN type = 'refund' THEN amount ELSE 0 END), 0) AS refund,
        COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) AS expense
      FROM transactions WHERE status = 'paid'
        AND transaction_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
@@ -96,12 +99,13 @@ async function getFinancialReport() {
     const monthlyData = monthlyRows.map((r) => ({
         month: r.month,
         income: Number(r.income || 0),
+        refund: Number(r.refund || 0),
         expense: Number(r.expense || 0),
-        profit: Number(r.income || 0) - Number(r.expense || 0),
+        profit: Number(r.income || 0) - Number(r.refund || 0) - Number(r.expense || 0),
     }))
 
     return {
-        summary: { totalIncome, totalExpense, netProfit: totalIncome - totalExpense },
+        summary: { totalIncome, totalRefund, totalExpense, netProfit: totalIncome - totalRefund - totalExpense },
         monthlyData,
     }
 }
