@@ -14,7 +14,7 @@ export default function Receipt() {
                 {/* Hotel Header */}
                 <div className="flex justify-between items-start border-b pb-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-slate-800">MyHotel</h1>
+                        <h1 className="text-3xl font-bold text-slate-800">Brunelleschi Hotel</h1>
                         <p className="text-sm text-slate-500 mt-1">123 Hotel Avenue, City, Country</p>
                     </div>
                     <div className="text-right">
