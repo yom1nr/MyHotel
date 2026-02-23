@@ -12,6 +12,7 @@ const createBookingSchema = z.object({
 
 const updateBookingStatusSchema = z.object({
     status: z.enum(['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled']),
+    paymentMethod: z.enum(['cash', 'transfer', 'card']).optional(),
 })
 
 module.exports = { createBookingSchema, updateBookingStatusSchema }

@@ -146,7 +146,7 @@ async function getBookings() {
     return rows
 }
 
-async function updateBookingStatus(id, status) {
+async function updateBookingStatus(id, status, paymentMethod = 'cash') {
     const numId = Number(id)
     if (!numId) throw new ValidationError('Invalid booking id')
 
@@ -180,6 +180,27 @@ async function updateBookingStatus(id, status) {
                 transaction_date: new Date(),
                 reference_note: 'Auto refund on cancellation',
             })
+        }
+
+        if (status === 'checked_out' && booking.status !== 'checked_out') {
+            const [existingTx] = await conn.query(
+                "SELECT id FROM transactions WHERE booking_id = ? AND type = 'payment' LIMIT 1",
+                [numId]
+            )
+
+            if (existingTx.length === 0) {
+                const txCode = generateTransactionCode()
+                await conn.query('INSERT INTO transactions SET ?', {
+                    booking_id: numId,
+                    transaction_code: txCode,
+                    type: 'payment',
+                    method: paymentMethod,
+                    amount: Number(booking.total_amount),
+                    status: 'paid',
+                    transaction_date: new Date(),
+                    reference_note: 'Auto payment on checkout',
+                })
+            }
         }
 
         await conn.commit()

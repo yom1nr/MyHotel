@@ -28,7 +28,8 @@ export async function getBookings(): Promise<Booking[]> {
 
 export async function updateBookingStatus(
   id: number,
-  status: 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled'
+  status: 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled',
+  paymentMethod?: 'cash' | 'transfer' | 'card'
 ): Promise<Booking> {
   const res = await fetch(`${BASE_URL}/api/bookings/${id}/status`, {
     method: 'PUT',
@@ -36,7 +37,7 @@ export async function updateBookingStatus(
       'Content-Type': 'application/json',
       ...authHeaders(),
     },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, paymentMethod }),
   })
 
   const json = await parseJson<Booking>(res)

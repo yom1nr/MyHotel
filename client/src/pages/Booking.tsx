@@ -57,6 +57,8 @@ export default function BookingPage() {
   const [modalOpen, setModalOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<BookingFormState>(emptyForm)
+  const [checkoutBookingId, setCheckoutBookingId] = useState<number | null>(null)
+  const [checkoutPaymentMethod, setCheckoutPaymentMethod] = useState<'cash' | 'transfer' | 'card'>('cash')
 
   async function refresh() {
     const [bookingData, roomData] = await Promise.all([getBookings(), getRooms()])
@@ -192,10 +194,7 @@ export default function BookingPage() {
                     <td className="whitespace-nowrap px-4 py-3"><Badge variant={meta.variant}>{meta.label}</Badge></td>
                     <td className="whitespace-nowrap px-4 py-3 text-right">
                       {b.status === 'checked_in' ? (
-                        <Button size="sm" variant="secondary" onClick={async () => {
-                          try { await updateBookingStatus(b.id, 'checked_out'); await refresh(); toast.success('Check-out สำเร็จ') }
-                          catch (e) { toast.error(e instanceof Error ? e.message : 'Update failed') }
-                        }}>Check-out</Button>
+                        <Button size="sm" variant="secondary" onClick={() => setCheckoutBookingId(b.id)}>Check-out</Button>
                       ) : b.status === 'pending' || b.status === 'confirmed' ? (
                         <Button size="sm" onClick={async () => {
                           try { await updateBookingStatus(b.id, 'checked_in'); await refresh(); toast.success('Check-in สำเร็จ') }
@@ -210,6 +209,36 @@ export default function BookingPage() {
           </table>
         </div>
       </Card>
+
+      <Modal open={checkoutBookingId !== null} onClose={() => !saving && setCheckoutBookingId(null)} title="Check-out & สรุปยอด" subtitle="กรุณาเลือกช่องทางการชำระเงิน">
+        <div className="space-y-4">
+          <div>
+            <label className="mb-2 block text-xs font-medium text-slate-400">ช่องทางการชำระเงิน</label>
+            <select value={checkoutPaymentMethod} onChange={(e) => setCheckoutPaymentMethod(e.target.value as 'cash' | 'transfer' | 'card')} className={inputCls}>
+              <option value="cash">เงินสด (Cash)</option>
+              <option value="transfer">โอนเงิน (Transfer)</option>
+              <option value="card">บัตรเครดิต/เดบิต (Card)</option>
+            </select>
+          </div>
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button type="button" variant="secondary" onClick={() => !saving && setCheckoutBookingId(null)} disabled={saving}>ยกเลิก</Button>
+            <Button onClick={async () => {
+              if (!checkoutBookingId) return
+              try {
+                setSaving(true)
+                await updateBookingStatus(checkoutBookingId, 'checked_out', checkoutPaymentMethod)
+                await refresh()
+                setCheckoutBookingId(null)
+                toast.success('Check-out และบันทึกรายได้สำเร็จ')
+              } catch (e) {
+                toast.error(e instanceof Error ? e.message : 'Checkout failed')
+              } finally {
+                setSaving(false)
+              }
+            }} loading={saving}>{saving ? 'กำลังดำเนินการ...' : 'ยืนยัน Check-out'}</Button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal open={modalOpen} onClose={() => !saving && setModalOpen(false)} title="New Booking" subtitle="เลือกห้อง ระบุช่วงวันที่ และข้อมูลผู้เข้าพัก">
         <form onSubmit={onSubmit} className="space-y-4">

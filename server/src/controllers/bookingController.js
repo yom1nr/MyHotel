@@ -19,7 +19,7 @@ const getBookings = asyncHandler(async (_req, res) => {
 })
 
 const updateBookingStatus = asyncHandler(async (req, res) => {
-  const booking = await bookingService.updateBookingStatus(req.params.id, req.body.status)
+  const booking = await bookingService.updateBookingStatus(req.params.id, req.body.status, req.body.paymentMethod)
   return success(res, booking)
 })
 
