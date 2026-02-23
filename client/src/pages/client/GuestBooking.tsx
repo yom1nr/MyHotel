@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom'
 
 import { formatCurrencyTHB } from '../../utils/format'
 
-type PublicRoom = { id: number; room_number: string; room_type: 'standard' | 'deluxe' | 'suite'; floor: number | null; capacity_adults: number; capacity_children: number; base_price: number; status: string; description: string | null }
+import { createPublicBooking } from '../../services/bookingService'
+import { getPublicRooms } from '../../services/roomService'
+
 type Step = 1 | 2 | 3 | 4
 type GuestInfo = { name: string; phone: string; email: string }
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
 
 function calcNights(checkIn: string, checkOut: string) {
   if (!checkIn || !checkOut) return 0
@@ -22,7 +22,7 @@ function calcNights(checkIn: string, checkOut: string) {
 
 export default function GuestBooking() {
   const [step, setStep] = useState<Step>(1)
-  const [rooms, setRooms] = useState<PublicRoom[]>([])
+  const [rooms, setRooms] = useState<any[]>([])
   const [loadingRooms, setLoadingRooms] = useState(true)
   const [roomsError, setRoomsError] = useState<string | null>(null)
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null)
@@ -36,7 +36,7 @@ export default function GuestBooking() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      try { setLoadingRooms(true); setRoomsError(null); const res = await fetch(`${API_BASE_URL}/api/public/rooms`); const json = (await res.json()) as { success: boolean; data?: PublicRoom[]; message?: string }; if (!res.ok || !json.success || !json.data) throw new Error(json.message || 'Failed to load rooms'); if (!cancelled) setRooms(json.data) }
+      try { setLoadingRooms(true); setRoomsError(null); const data = await getPublicRooms(); if (!cancelled) setRooms(data) }
       catch (e) { if (!cancelled) setRoomsError(e instanceof Error ? e.message : 'Failed to load rooms') }
       finally { if (!cancelled) setLoadingRooms(false) }
     }
@@ -63,10 +63,8 @@ export default function GuestBooking() {
     if (!selectedRoomId || !checkIn || !checkOut) return
     try {
       setSubmitting(true); setSubmitError(null)
-      const res = await fetch(`${API_BASE_URL}/api/public/bookings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room_id: selectedRoomId, check_in_date: checkIn, check_out_date: checkOut, guest_name: guest.name, guest_phone: guest.phone, guest_email: guest.email || null }) })
-      const json = (await res.json()) as { success: boolean; data?: { booking_code: string }; message?: string }
-      if (!res.ok || !json.success || !json.data?.booking_code) throw new Error(json.message || 'จองไม่สำเร็จ')
-      setBookingCode(json.data.booking_code); setStep(4)
+      const data = await createPublicBooking({ room_id: selectedRoomId, check_in_date: checkIn, check_out_date: checkOut, guest_name: guest.name, guest_phone: guest.phone, guest_email: guest.email || null })
+      setBookingCode(data.booking_code); setStep(4)
     } catch (e) { setSubmitError(e instanceof Error ? e.message : 'จองไม่สำเร็จ') }
     finally { setSubmitting(false) }
   }

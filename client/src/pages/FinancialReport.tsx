@@ -58,7 +58,7 @@ export default function FinancialReport() {
           </div>
         </div>
         <div className="mt-5 h-72">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
             <BarChart data={monthlyData} margin={{ left: 8, right: 12 }}>
               <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
               <YAxis tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `${Number(v) / 1000}k`} />

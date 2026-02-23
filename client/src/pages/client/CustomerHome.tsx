@@ -11,7 +11,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { getRooms } from '../../services/roomService'
+import { getPublicRooms } from '../../services/roomService'
 import type { Room } from '../../types/room'
 import { formatCurrencyTHB } from '../../utils/format'
 import HotelLogo from '../../components/HotelLogo'
@@ -34,7 +34,7 @@ export default function CustomerHome() {
     async function load() {
       try {
         setLoadingRooms(true)
-        const data = await getRooms()
+        const data = await getPublicRooms()
         if (!cancelled) setRooms(data)
       } catch {
         if (!cancelled) {

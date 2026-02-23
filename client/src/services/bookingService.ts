@@ -64,3 +64,27 @@ export async function createBooking(input: BookingCreateInput): Promise<Booking>
 
   return json.data
 }
+
+export async function createPublicBooking(input: {
+  room_id: number
+  check_in_date: string
+  check_out_date: string
+  guest_name: string
+  guest_phone: string
+  guest_email?: string | null
+}): Promise<{ booking_code: string }> {
+  const res = await fetch(`${BASE_URL}/api/public/bookings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input),
+  })
+
+  const json = (await res.json()) as { success: boolean; data?: { booking_code: string }; message?: string }
+  if (!res.ok || !json.success || !json.data?.booking_code) {
+    throw new Error(json.message || 'Failed to create public booking')
+  }
+
+  return json.data
+}

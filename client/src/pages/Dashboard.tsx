@@ -187,7 +187,7 @@ export default function Dashboard() {
           </div>
 
           <div className="mt-4 h-72">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
               <BarChart data={revenueByMonth} margin={{ left: 4, right: 10 }}>
                 <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fill: '#64748b', fontSize: 12 }} tickFormatter={(v) => `${v / 1000}k`} />
@@ -216,7 +216,7 @@ export default function Dashboard() {
           </div>
 
           <div className="mt-4 h-60">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
               <PieChart>
                 <Pie
                   data={roomStatus}

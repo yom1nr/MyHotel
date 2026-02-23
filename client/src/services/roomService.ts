@@ -31,6 +31,17 @@ export async function getRooms(): Promise<Room[]> {
   return json.data
 }
 
+export async function getPublicRooms(): Promise<Room[]> {
+  const res = await fetch(`${BASE_URL}/api/public/rooms`)
+
+  const json = await parseJson<Room[]>(res)
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || 'Failed to load public rooms')
+  }
+
+  return json.data
+}
+
 export async function createRoom(input: RoomCreateInput): Promise<Room> {
   const res = await fetch(`${BASE_URL}/api/rooms`, {
     method: 'POST',
