@@ -29,7 +29,7 @@ export async function getBookings(): Promise<Booking[]> {
 export async function updateBookingStatus(
   id: number,
   status: 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled',
-  paymentMethod?: 'cash' | 'transfer' | 'card'
+  paymentMethod?: 'cash' | 'transfer' | 'card' | 'promptpay'
 ): Promise<Booking> {
   const res = await fetch(`${BASE_URL}/api/bookings/${id}/status`, {
     method: 'PUT',
