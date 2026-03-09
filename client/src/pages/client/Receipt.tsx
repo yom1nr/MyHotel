@@ -15,7 +15,7 @@ export default function Receipt() {
                 <div className="flex justify-between items-start border-b pb-6">
                     <div>
                         <h1 className="text-3xl font-bold text-slate-800">Brunelleschi Hotel</h1>
-                        <p className="text-sm text-slate-500 mt-1">123 Hotel Avenue, City, Country</p>
+                        <p className="text-sm text-slate-500 mt-1">111 Soi Sukhumvit 99 Klongtoey Subdistrict, Klongtoey District, Thailand 10110</p>
                     </div>
                     <div className="text-right">
                         <h2 className="text-2xl font-bold text-indigo-600 uppercase tracking-widest">Receipt</h2>
