@@ -2,6 +2,8 @@ const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const compression = require('compression')
+const swaggerUi = require('swagger-ui-express')
+const swaggerSpec = require('./config/swagger')
 
 const requestId = require('./middleware/requestId')
 const errorHandler = require('./middleware/errorHandler')
@@ -65,6 +67,12 @@ app.get('/health', (_req, res) => {
     },
   })
 })
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'MyHotel API Documentation',
+}))
+app.get('/api-docs.json', (_req, res) => res.json(swaggerSpec))
 
 app.use(errorHandler)
 

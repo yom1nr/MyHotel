@@ -7,8 +7,9 @@ function validate(schema) {
             req.body = schema.parse(req.body)
             next()
         } catch (err) {
-            if (err instanceof ZodError) {
-                const details = err.errors.map((e) => ({
+        if (err instanceof ZodError) {
+                const zodIssues = err.issues || err.errors || []
+                const details = zodIssues.map((e) => ({
                     field: e.path.join('.'),
                     message: e.message,
                 }))
